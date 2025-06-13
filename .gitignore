@@ -1,0 +1,10 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+spell-tree-todo.md
+start_dev_server.sh
+
+# Ignore Gradle build output directory
+build
+target/
+.vscode/
+.idea/
