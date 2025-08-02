@@ -9,8 +9,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import org.bukkit.NamespacedKey;
+
 import io.github.tootertutor.ethyrial.data.PlayerData;
 import io.github.tootertutor.ethyrial.data.PlayerStats;
+import io.github.tootertutor.ethyrial.data.SpellSlots;
+import io.github.tootertutor.ethyrial.spells.SpellUtils;
+import it.unimi.dsi.fastutil.Pair;
 
 public class PlayerDAO {
 
@@ -88,4 +93,83 @@ public class PlayerDAO {
             }
         });
     }
+
+    public CompletableFuture<SpellSlots> saveWandBindings(UUID uuid, String wandId, boolean isLeftClick,
+            NamespacedKey spellKey) {
+        return db.runAsyncQuery(() -> {
+            try (Connection conn = db.getConnection()) {
+                String spell = spellKey != null ? spellKey.toString() : null;
+
+                // Insert the row if it doesn’t exist
+                try (PreparedStatement insert = conn.prepareStatement(
+                        "INSERT OR IGNORE INTO wand_bindings (uuid, wand_id, left_spell, right_spell) VALUES (?, ?, NULL, NULL)")) {
+                    insert.setString(1, uuid.toString());
+                    insert.setString(2, wandId);
+                    insert.executeUpdate();
+                }
+
+                String query = isLeftClick
+                        ? "UPDATE wand_bindings SET left_spell = ? WHERE uuid = ? AND wand_id = ?"
+                        : "UPDATE wand_bindings SET right_spell = ? WHERE uuid = ? AND wand_id = ?";
+
+                try (PreparedStatement insert = conn.prepareStatement(
+                        "INSERT OR IGNORE INTO wand_bindings (uuid, wand_id, left_spell, right_spell) VALUES (?, ?, NULL, NULL)")) {
+                    insert.setString(1, uuid.toString());
+                    insert.setString(2, wandId);
+
+                    insert.executeUpdate();
+                }
+
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, spell);
+                    stmt.setString(2, uuid.toString());
+                    stmt.setString(3, wandId);
+
+                    stmt.executeUpdate();
+                }
+
+                return new SpellSlots(uuid, spellKey);
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to save wand bindings for " + uuid, e);
+            }
+        });
+    }
+
+    public CompletableFuture<Pair<NamespacedKey, NamespacedKey>> loadWandBindings(UUID uuid, String wandId) {
+        return db.runAsyncQuery(() -> {
+            try (Connection conn = db.getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(
+                            "SELECT left_spell, right_spell FROM wand_bindings WHERE uuid = ? AND wand_id = ?")) {
+
+                stmt.setString(1, uuid.toString());
+                stmt.setString(2, wandId);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    String leftSpell = rs.getString("left_spell");
+                    String rightSpell = rs.getString("right_spell");
+
+                    NamespacedKey leftKey = null;
+                    NamespacedKey rightKey = null;
+
+                    if (leftSpell != null && !leftSpell.isEmpty()) {
+                        leftKey = SpellUtils.toKey(leftSpell);
+                    }
+                    if (rightSpell != null && !rightSpell.isEmpty()) {
+                        rightKey = SpellUtils.toKey(rightSpell);
+                    }
+
+
+                    return Pair.of(leftKey, rightKey);
+
+                } else {
+                    return Pair.of(null, null);
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to load wand bindings for " + uuid, e);
+            }
+        });
+    }
+
 }

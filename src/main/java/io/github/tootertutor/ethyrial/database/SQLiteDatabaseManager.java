@@ -83,6 +83,8 @@ public class SQLiteDatabaseManager {
                 "mana INTEGER," +
                 "spellPower INTEGER," +
                 "bonusHealth INTEGER" +
+                "selected_spell_left TEXT" +
+                "selected_spell_right TEXT" +
                 ");";
 
         String createUnlockedSpellsTable = "CREATE TABLE IF NOT EXISTS unlocked_spells (" +
@@ -91,9 +93,18 @@ public class SQLiteDatabaseManager {
                 "PRIMARY KEY (uuid, spell_id)" +
                 ");";
 
+        String createWandBindingsTable = "CREATE TABLE IF NOT EXISTS wand_bindings (" +
+                "uuid TEXT NOT NULL," +
+                "wand_id TEXT NOT NULL," +
+                "left_spell TEXT," +
+                "right_spell TEXT," +
+                "PRIMARY KEY (uuid, wand_id)" +
+                ");";
+
         try (var stmt = conn.createStatement()) {
             stmt.execute(createPlayerDataTable);
             stmt.execute(createUnlockedSpellsTable);
+            stmt.execute(createWandBindingsTable);
         }
     }
 }
