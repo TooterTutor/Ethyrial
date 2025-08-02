@@ -1,18 +1,19 @@
 package io.github.tootertutor.ethyrial.commands;
 
+import java.util.List;
+
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import io.github.tootertutor.ethyrial.Ethyrial;
+import io.github.tootertutor.ethyrial.interfaces.Subcommand;
 import io.github.tootertutor.ethyrial.items.Item;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class GiveCommand implements CommandExecutor {
+public class GiveCommand implements Subcommand {
     private final Ethyrial plugin;
 
     public GiveCommand(Ethyrial plugin) {
@@ -20,10 +21,29 @@ public class GiveCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Usage: /ethyrial give <player> <item> <amount>
+    public String getName() {
+        return "give";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Give a player a plugin item.";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return List.of();
+    }
+
+    @Override
+    public boolean execute(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can use this command.");
+            return true;
+        }
+
         if (args.length < 3) {
-            sender.sendMessage(Component.text("Usage: /ethyrial give <player> <item> <amount>", NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /eh give <player> <item> <amount>", NamedTextColor.RED));
             return true;
         }
 
@@ -34,7 +54,7 @@ public class GiveCommand implements CommandExecutor {
         }
 
         NamespacedKey key = new NamespacedKey(plugin, args[1].toLowerCase());
-        Item item = plugin.getItemsRegistered().getItem(key); // Make sure this method exists!
+        Item item = Ethyrial.getInstance().getItemsRegistered().getItem(key); // Make sure this method exists!
 
         if (item == null) {
             sender.sendMessage(Component.text("Item not found: " + args[1], NamedTextColor.RED));
@@ -59,4 +79,10 @@ public class GiveCommand implements CommandExecutor {
                 NamedTextColor.GREEN));
         return true;
     }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, String[] args) {
+        return List.of();
+    }
+
 }

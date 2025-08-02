@@ -22,6 +22,7 @@ public class EthyrialCommand implements CommandExecutor, TabCompleter {
         // Discover or manually register
         registerSubcommand(new GiveBookCommand(plugin));
         registerSubcommand(new CastCommand(plugin));
+        registerSubcommand(new GiveCommand(plugin));
     }
 
     private void registerSubcommand(Subcommand cmd) {
