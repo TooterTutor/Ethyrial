@@ -20,9 +20,13 @@ permissions:
       ethyrial.command: true
       ethyrial.givebook: true
       ethyrial.spell.*: true
+      ethyrial.command: true
   ethyrial.command:
     description: Grants access to the base Ethyrial command
     default: op
   ethyrial.givebook:
     description: Gives the Ethyrial spellbook to the player
     default: true
+  ethyrial.give:
+    description: Gives a plugin item to the player
+    default: op
