@@ -1,5 +1,9 @@
 package io.github.tootertutor.ethyrial.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,6 +14,7 @@ import io.github.tootertutor.ethyrial.menu.menus.CodexMenu;
 import io.github.tootertutor.ethyrial.menu.menus.InfusionMenu;
 import io.github.tootertutor.ethyrial.menu.menus.SkillTreeMenu;
 import io.github.tootertutor.ethyrial.menu.menus.SpellTreeMenu;
+import io.github.tootertutor.ethyrial.menu.menus.StatsMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -24,54 +29,34 @@ public class MainMenu extends Menu {
 	private final PlayerData data;
 
 	public MainMenu(Player player, PlayerData data) {
-		super(player, 54, Component.text("Stats"));
+		super(player, 9 * 5, Component.text("Spell Book"));
 		this.data = data;
 	}
 
 	@Override
 	public void render() {
 		MenuUtils.applyBorder(getInventory(), DyeColor.BLACK, plugin, MenuUtils.BorderStyle.CORNERS);
-		// #region Stats
-		setItem(11, MenuUtils.createItem(Material.GLOWSTONE_DUST,
-				Component.text()
-						.content("Mana: ")
-						.color(NamedTextColor.GRAY)
-						.decoration(TextDecoration.ITALIC, false)
-						.append(
-								Component.text(data.getStats().getMana())
-										.color(NamedTextColor.BLUE))
-						.build()));
-		setItem(13,
-				MenuUtils.createItem(Material.IRON_SWORD,
-						Component.text()
-								.content("Spell Power: ")
-								.color(NamedTextColor.GRAY)
-								.decoration(TextDecoration.ITALIC, false)
-								.append(
-										Component.text(data.getStats().getSpellPower())
-												.color(NamedTextColor.GOLD))
-								.build()));
-		setItem(15, MenuUtils.createItem(Material.TOTEM_OF_UNDYING,
-				Component.text()
-						.content("Bonus Health: ")
-						.color(NamedTextColor.GRAY)
-						.decoration(TextDecoration.ITALIC, false)
-						.append(
-								Component.text(data.getStats().getBonusHealth())
-										.color(NamedTextColor.GREEN))
-						.build()));
-		// #endregion
 
-		// #region Magic
-		setItem(37, MenuUtils.createItem(Material.KNOWLEDGE_BOOK, Component.text()
-				.content("Codex")
-				.color(NamedTextColor.LIGHT_PURPLE)
+		// Stats
+		setItem(22, MenuUtils.createItem(Material.PLAYER_HEAD, Component.text()
+				.content("Stats")
+				.color(NamedTextColor.GOLD)
 				.decoration(TextDecoration.ITALIC, false)
-				.build()), event -> {
-					MenuManager.open(player, new CodexMenu(player, data));
+				.build(), player.getUniqueId()), event -> {
+					MenuManager.open(player, new StatsMenu(player, data));
 				});
 
-		setItem(30, MenuUtils.createItem(Material.WRITTEN_BOOK, Component.text()
+		// Skill Tree
+		setItem(20, MenuUtils.createItem(Material.WRITABLE_BOOK, Component.text()
+				.content("Skill Tree")
+				.color(TextColor.color(0x478cd1))
+				.decoration(TextDecoration.ITALIC, false)
+				.build()), event -> {
+					MenuManager.open(player, new SkillTreeMenu(player, data));
+				});
+
+		// Spell Tree
+		setItem(24, MenuUtils.createItem(Material.WRITTEN_BOOK, Component.text()
 				.content("Spell Tree")
 				.color(TextColor.color(0x7a57ba))
 				.decoration(TextDecoration.ITALIC, false)
@@ -79,22 +64,92 @@ public class MainMenu extends Menu {
 					MenuManager.open(player, new SpellTreeMenu(player, data));
 				});
 
-		setItem(32, MenuUtils.createItem(Material.PLAYER_HEAD, Component.text()
-				.content("Skill Tree")
-				.color(TextColor.color(0x7a57ba))
+		// Codex
+		setItem(39, MenuUtils.createItem(Material.KNOWLEDGE_BOOK, Component.text()
+				.content("Codex")
+				.color(NamedTextColor.LIGHT_PURPLE)
 				.decoration(TextDecoration.ITALIC, false)
-				.build(), player.getUniqueId()), event -> {
-					MenuManager.open(player, new SkillTreeMenu(player, data));
+				.build()), event -> {
+					MenuManager.open(player, new CodexMenu(player, data));
 				});
 
-		setItem(43, MenuUtils.createItem(Material.DRAGON_BREATH, Component.text()
-				.content("Infusion")
+		// Infusions
+		setItem(41, MenuUtils.createItem(Material.DRAGON_BREATH, Component.text()
+				.content("Infusions")
 				.color(TextColor.color(0xa857ba))
 				.decoration(TextDecoration.ITALIC, false)
 				.build()), event -> {
 					MenuManager.open(player, new InfusionMenu(player, data));
 				});
 
-		// #endregion
+		// Wand & Staff
+		plugin.getPlayerDAO().loadWandBindings(player.getUniqueId(), "wand").thenAccept(bindings -> {
+			String leftSpell = bindings.left() != null ? bindings.left().getKey() : "None";
+			String rightSpell = bindings.right() != null ? bindings.right().getKey() : "None";
+			List<Component> lore = new ArrayList<>();
+
+			// Left spell line
+			lore.add(Component.text()
+					.content("Left Core: ")
+					.color(NamedTextColor.AQUA)
+					.append(Component.text(leftSpell, NamedTextColor.WHITE))
+					.decoration(TextDecoration.ITALIC, false)
+					.build());
+
+			// Right spell line
+			lore.add(Component.text()
+					.content("Right Core: ")
+					.color(NamedTextColor.AQUA)
+					.append(Component.text(rightSpell, NamedTextColor.WHITE))
+					.decoration(TextDecoration.ITALIC, false)
+					.build());
+
+			Bukkit.getScheduler().runTask(plugin, () -> {
+				setItem(3, MenuUtils.createItem(Material.STICK,
+						Component.text()
+								.content("Wand")
+								.color(NamedTextColor.GOLD)
+								.decoration(TextDecoration.ITALIC, false)
+								.build(),
+						player.getUniqueId(), lore),
+						event -> {
+							// Open wand management menu
+						});
+			});
+		});
+
+		plugin.getPlayerDAO().loadWandBindings(player.getUniqueId(), "staff").thenAccept(bindings -> {
+			String leftSpell = bindings.left() != null ? bindings.left().getKey() : "None";
+			String rightSpell = bindings.right() != null ? bindings.right().getKey() : "None";
+			List<Component> lore = new ArrayList<>();
+
+			// Left spell line
+			lore.add(Component.text()
+					.content("Left Core: ")
+					.color(NamedTextColor.AQUA)
+					.append(Component.text(leftSpell, NamedTextColor.WHITE))
+					.decoration(TextDecoration.ITALIC, false)
+					.build());
+
+			// Right spell line
+			lore.add(Component.text()
+					.content("Right Core: ")
+					.color(NamedTextColor.AQUA)
+					.append(Component.text(rightSpell, NamedTextColor.WHITE))
+					.decoration(TextDecoration.ITALIC, false)
+					.build());
+
+			setItem(5, MenuUtils.createItem(Material.STICK,
+					Component.text()
+							.content("Staff")
+							.color(NamedTextColor.GOLD)
+							.decoration(TextDecoration.ITALIC, false)
+							.build(),
+					player.getUniqueId(), lore),
+					event -> {
+						// Open wand management menu
+					});
+		});
 	}
+
 }
