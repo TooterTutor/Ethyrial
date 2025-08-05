@@ -1,6 +1,5 @@
 package io.github.tootertutor.ethyrial.items;
 
-import java.net.http.WebSocket.Listener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,12 +10,13 @@ import java.util.stream.Collectors;
 import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.Plugin;
 
+import io.github.tootertutor.ethyrial.Ethyrial;
 import io.github.tootertutor.ethyrial.builders.ItemDataBuilder;
 import io.github.tootertutor.ethyrial.handlers.ItemTextHandler;
 import net.kyori.adventure.text.Component;
@@ -24,7 +24,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public abstract class Item implements Listener, Keyed {
-    protected final Plugin plugin;
+    protected final Ethyrial plugin;
     protected String displayName;
     protected Material material;
     protected List<String> lore;
@@ -39,16 +39,24 @@ public abstract class Item implements Listener, Keyed {
     // New field to store placeholders
     protected Map<String, String> placeholders = new HashMap<>();
 
-    protected Item(Plugin plugin, NamespacedKey key) {
+    protected Item(Ethyrial plugin, String key, String name, String nameColor, List<String> lore,
+            List<String> loreColor,
+            Material material, ItemStack itemStack) {
         this.plugin = plugin;
-        this.key = key;
+        this.key = new NamespacedKey(Ethyrial.getInstance(), key);
+        this.displayName = name;
+        this.nameColor = nameColor;
+        this.lore = lore;
+        this.loreColor = loreColor;
+        this.material = material;
+        this.itemStack = itemStack;
         this.itemDataBuilder = new ItemDataBuilder(plugin);
         this.textHandler = new ItemTextHandler(itemStack);
         setupBasePersistentData();
         updateItemText();
     }
 
-    protected Item(Plugin plugin, ItemStack itemStack) {
+    protected Item(Ethyrial plugin, ItemStack itemStack) {
         this.plugin = plugin;
         this.itemStack = itemStack;
         ItemMeta meta = itemStack.getItemMeta();
@@ -167,6 +175,7 @@ public abstract class Item implements Listener, Keyed {
     /**
      * Replace placeholders in the input string with their corresponding values.
      * If a placeholder has no value, it is removed from the string.
+     * 
      * @param input the input string possibly containing placeholders
      * @return the string with placeholders replaced or removed
      */
@@ -190,6 +199,7 @@ public abstract class Item implements Listener, Keyed {
 
     /**
      * Set the placeholders map and update the item metadata.
+     * 
      * @param placeholders the map of placeholder keys to values
      */
     public void setPlaceholders(Map<String, String> placeholders) {
@@ -199,7 +209,8 @@ public abstract class Item implements Listener, Keyed {
 
     /**
      * Update or add a single placeholder and refresh metadata.
-     * @param key the placeholder key
+     * 
+     * @param key   the placeholder key
      * @param value the placeholder value
      */
     public void updatePlaceholder(String key, String value) {
