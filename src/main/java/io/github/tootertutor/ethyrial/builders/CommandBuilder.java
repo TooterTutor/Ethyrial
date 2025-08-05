@@ -7,7 +7,8 @@ import java.util.Map;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
+
+import io.github.tootertutor.ethyrial.Ethyrial;
 
 /**
  * A simple command dispatcher that maps subcommand names to CommandExecutor instances.
@@ -20,7 +21,7 @@ public class CommandBuilder {
      * Constructs a CommandBuilder.
      * @param plugin The plugin instance (currently unused).
      */
-    public CommandBuilder(Plugin plugin) {
+    public CommandBuilder(Ethyrial plugin) {
     }
 
     /**
