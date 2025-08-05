@@ -20,7 +20,6 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,27 +28,27 @@ import io.github.tootertutor.ethyrial.interfaces.AutoRegisterSpell;
 import io.github.tootertutor.ethyrial.spells.Spell;
 
 public class SpellRegister implements Registry<Keyed> {
-    protected final Plugin plugin;
+    protected Ethyrial plugin = Ethyrial.getInstance();
     private final Map<NamespacedKey, Spell> spellMap = new HashMap<>(); // Map to store spells by NamespacedKey
 
-    public SpellRegister(Plugin plugin) {
+    public SpellRegister(Ethyrial plugin) {
         this.plugin = plugin;
     }
 
-        public void autoRegisterSpells() {
+    public void autoRegisterSpells() {
         // Get the plugin's class loader
         ClassLoader classLoader = plugin.getClass().getClassLoader();
-        
+
         // Define your spell package
         String packageName = "io.github.tootertutor.ethyrial.spells";
-        
+
         // Convert package name to path
         String path = packageName.replace('.', '/');
-        
+
         try {
             // Get all class files in the package
             Enumeration<URL> resources = classLoader.getResources(path);
-            
+
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
                 if (resource.getProtocol().equals("jar")) {
@@ -79,8 +78,9 @@ public class SpellRegister implements Registry<Keyed> {
 
     private void processDirectory(File directory, String packageName) {
         File[] files = directory.listFiles();
-        if (files == null) return;
-        
+        if (files == null)
+            return;
+
         for (File file : files) {
             if (file.isDirectory()) {
                 processDirectory(file, packageName + "." + file.getName());
@@ -93,11 +93,10 @@ public class SpellRegister implements Registry<Keyed> {
     private void loadClass(String className) {
         try {
             Class<?> clazz = Class.forName(className);
-            if (AutoRegisterSpell.class.isAssignableFrom(clazz) && 
-                Spell.class.isAssignableFrom(clazz)) {
+            if (AutoRegisterSpell.class.isAssignableFrom(clazz) &&
+                    Spell.class.isAssignableFrom(clazz)) {
                 @SuppressWarnings("unchecked")
-                Class<? extends Spell> spellClass = 
-                    (Class<? extends Spell>) clazz;
+                Class<? extends Spell> spellClass = (Class<? extends Spell>) clazz;
                 registerSpell(spellClass);
             }
         } catch (ClassNotFoundException e) {
@@ -105,9 +104,9 @@ public class SpellRegister implements Registry<Keyed> {
         }
     }
 
-
     public void registerSpell(NamespacedKey key, Spell spell) {
         spellMap.put(key, spell);
+        SpellRegistry.register(spell);
 
         if (spell instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) spell, plugin);
@@ -123,9 +122,10 @@ public class SpellRegister implements Registry<Keyed> {
             constructor.setAccessible(true);
 
             // Create instance with the actual plugin reference
-            Spell spell = constructor.newInstance((Ethyrial) plugin);
+            Spell spell = constructor.newInstance(Ethyrial.getInstance());
 
             spellMap.put(spell.getKey(), spell);
+            SpellRegistry.register(spell);
 
             if (spell instanceof Listener) {
                 Bukkit.getPluginManager().registerEvents((Listener) spell, plugin);

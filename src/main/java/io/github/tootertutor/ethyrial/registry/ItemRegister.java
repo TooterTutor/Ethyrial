@@ -20,7 +20,6 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,27 +28,27 @@ import io.github.tootertutor.ethyrial.interfaces.AutoRegisterItem;
 import io.github.tootertutor.ethyrial.items.Item;
 
 public class ItemRegister implements Registry<Keyed> {
-    protected final Plugin plugin;
+    protected final Ethyrial plugin;
     private final Map<NamespacedKey, Item> itemMap = new HashMap<>(); // Map to store items by NamespacedKey
 
-    public ItemRegister(Plugin plugin) {
+    public ItemRegister(Ethyrial plugin) {
         this.plugin = plugin;
     }
 
-        public void autoRegisterItems() {
+    public void autoRegisterItems() {
         // Get the plugin's class loader
         ClassLoader classLoader = plugin.getClass().getClassLoader();
-        
+
         // Define your item package
         String packageName = "io.github.tootertutor.ethyrial.items";
-        
+
         // Convert package name to path
         String path = packageName.replace('.', '/');
-        
+
         try {
             // Get all class files in the package
             Enumeration<URL> resources = classLoader.getResources(path);
-            
+
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
                 if (resource.getProtocol().equals("jar")) {
@@ -79,8 +78,9 @@ public class ItemRegister implements Registry<Keyed> {
 
     private void processDirectory(File directory, String packageName) {
         File[] files = directory.listFiles();
-        if (files == null) return;
-        
+        if (files == null)
+            return;
+
         for (File file : files) {
             if (file.isDirectory()) {
                 processDirectory(file, packageName + "." + file.getName());
@@ -93,18 +93,16 @@ public class ItemRegister implements Registry<Keyed> {
     private void loadClass(String className) {
         try {
             Class<?> clazz = Class.forName(className);
-            if (AutoRegisterItem.class.isAssignableFrom(clazz) && 
-                Item.class.isAssignableFrom(clazz)) {
+            if (AutoRegisterItem.class.isAssignableFrom(clazz) &&
+                    Item.class.isAssignableFrom(clazz)) {
                 @SuppressWarnings("unchecked")
-                Class<? extends Item> itemClass = 
-                    (Class<? extends Item>) clazz;
+                Class<? extends Item> itemClass = (Class<? extends Item>) clazz;
                 registerItem(itemClass);
             }
         } catch (ClassNotFoundException e) {
             plugin.getLogger().warning("Class not found: " + className);
         }
     }
-
 
     public void registerItem(NamespacedKey key, Item item) {
         itemMap.put(key, item);
