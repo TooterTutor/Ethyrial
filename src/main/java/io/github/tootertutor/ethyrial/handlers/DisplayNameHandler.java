@@ -9,7 +9,8 @@ import net.kyori.adventure.text.format.TextColor;
 
 /**
  * Handler class for managing the display name of an ItemStack.
- * Supports setting, updating, placeholder replacement, color gradients, and clearing.
+ * Supports setting, updating, placeholder replacement, color gradients, and
+ * clearing.
  */
 public class DisplayNameHandler {
 
@@ -21,6 +22,7 @@ public class DisplayNameHandler {
 
     /**
      * Get the current display name component.
+     * 
      * @return the display name component, or null if none set
      */
     public Component getDisplayName() {
@@ -30,6 +32,7 @@ public class DisplayNameHandler {
 
     /**
      * Set the display name component.
+     * 
      * @param displayName the component to set
      */
     public void setDisplayName(Component displayName) {
@@ -42,6 +45,7 @@ public class DisplayNameHandler {
 
     /**
      * Set the display name from a plain string.
+     * 
      * @param displayName the string to set
      */
     public void setDisplayName(String displayName) {
@@ -50,15 +54,18 @@ public class DisplayNameHandler {
 
     /**
      * Set the display name from a plain string with a hex color.
+     * 
      * @param displayName the string to set
-     * @param hexColor the hex color string (e.g. "#FF0000")
+     * @param hexColor    the hex color string (e.g. "#FF0000")
      */
     public void setDisplayName(String displayName, String hexColor) {
-        setDisplayName(Component.text(displayName).color(TextColor.fromHexString(hexColor)));
+        setDisplayName(
+                Component.text(displayName != null ? displayName : " ").color(TextColor.fromHexString(hexColor)));
     }
 
     /**
      * Update the display name component.
+     * 
      * @param newDisplayName the new component to set
      */
     public void updateDisplayName(Component newDisplayName) {
@@ -67,16 +74,19 @@ public class DisplayNameHandler {
 
     /**
      * Apply a color gradient to the display name.
+     * 
      * @param startColor the start color hex string (e.g. "#FF0000")
-     * @param endColor the end color hex string (e.g. "#0000FF")
+     * @param endColor   the end color hex string (e.g. "#0000FF")
      */
     public void applyColorGradient(String startColor, String endColor) {
         Component displayName = getDisplayName();
-        if (displayName == null) return;
+        if (displayName == null)
+            return;
 
         String text = displayName.toString();
         int length = text.length();
-        if (length == 0) return;
+        if (length == 0)
+            return;
 
         TextComponent.Builder builder = Component.text();
         TextColor start = TextColor.fromHexString(startColor);
@@ -107,6 +117,7 @@ public class DisplayNameHandler {
 
     /**
      * Check if the item has a display name.
+     * 
      * @return true if display name is set, false otherwise
      */
     public boolean hasDisplayName() {
