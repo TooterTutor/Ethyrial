@@ -6,14 +6,15 @@ import java.util.Map;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
+
+import io.github.tootertutor.ethyrial.Ethyrial;
 
 /**
  * Builder class for managing custom item data using Bukkit's PersistentDataContainer.
  * Allows setting, getting, and checking for custom data keys and values.
  */
 public class ItemDataBuilder {
-    private final Plugin plugin;
+    private final Ethyrial plugin;
     private final Map<NamespacedKey, Object> data = new HashMap<>();
 
     /**
@@ -21,7 +22,7 @@ public class ItemDataBuilder {
      * 
      * @param plugin The plugin instance used to create NamespacedKeys.
      */
-    public ItemDataBuilder(Plugin plugin) {
+    public ItemDataBuilder(Ethyrial plugin) {
         this.plugin = plugin;
     }
 
