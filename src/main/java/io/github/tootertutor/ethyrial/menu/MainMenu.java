@@ -1,9 +1,14 @@
 package io.github.tootertutor.ethyrial.menu;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import io.github.tootertutor.ethyrial.Ethyrial;
 import io.github.tootertutor.ethyrial.data.PlayerData;
+import io.github.tootertutor.ethyrial.menu.menus.CodexMenu;
+import io.github.tootertutor.ethyrial.menu.menus.InfusionMenu;
+import io.github.tootertutor.ethyrial.menu.menus.SkillTreeMenu;
 import io.github.tootertutor.ethyrial.menu.menus.SpellTreeMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -15,6 +20,7 @@ import net.kyori.adventure.text.format.TextDecoration;
  */
 public class MainMenu extends Menu {
 
+	private final Ethyrial plugin = Ethyrial.getInstance();
 	private final PlayerData data;
 
 	public MainMenu(Player player, PlayerData data) {
@@ -24,6 +30,7 @@ public class MainMenu extends Menu {
 
 	@Override
 	public void render() {
+		MenuUtils.applyBorder(getInventory(), DyeColor.BLACK, plugin, MenuUtils.BorderStyle.CORNERS);
 		// #region Stats
 		setItem(11, MenuUtils.createItem(Material.GLOWSTONE_DUST,
 				Component.text()
@@ -41,8 +48,7 @@ public class MainMenu extends Menu {
 								.color(NamedTextColor.GRAY)
 								.decoration(TextDecoration.ITALIC, false)
 								.append(
-										Component.text(data.getStats()
-												.getSpellPower())
+										Component.text(data.getStats().getSpellPower())
 												.color(NamedTextColor.GOLD))
 								.build()));
 		setItem(15, MenuUtils.createItem(Material.TOTEM_OF_UNDYING,
@@ -62,13 +68,10 @@ public class MainMenu extends Menu {
 				.color(NamedTextColor.LIGHT_PURPLE)
 				.decoration(TextDecoration.ITALIC, false)
 				.build()), event -> {
-					Menu subMenu = MenuFactory.create("codex", player, data);
-					if (subMenu != null) {
-						subMenu.open();
-					}
+					MenuManager.open(player, new CodexMenu(player, data));
 				});
 
-		setItem(39, MenuUtils.createItem(Material.WRITTEN_BOOK, Component.text()
+		setItem(30, MenuUtils.createItem(Material.WRITTEN_BOOK, Component.text()
 				.content("Spell Tree")
 				.color(TextColor.color(0x7a57ba))
 				.decoration(TextDecoration.ITALIC, false)
@@ -76,15 +79,20 @@ public class MainMenu extends Menu {
 					MenuManager.open(player, new SpellTreeMenu(player, data));
 				});
 
-		setItem(41, MenuUtils.createItem(Material.DRAGON_BREATH, Component.text()
+		setItem(32, MenuUtils.createItem(Material.PLAYER_HEAD, Component.text()
+				.content("Skill Tree")
+				.color(TextColor.color(0x7a57ba))
+				.decoration(TextDecoration.ITALIC, false)
+				.build(), player.getUniqueId()), event -> {
+					MenuManager.open(player, new SkillTreeMenu(player, data));
+				});
+
+		setItem(43, MenuUtils.createItem(Material.DRAGON_BREATH, Component.text()
 				.content("Infusion")
 				.color(TextColor.color(0xa857ba))
 				.decoration(TextDecoration.ITALIC, false)
 				.build()), event -> {
-					Menu subMenu = MenuFactory.create("infusion", player, data);
-					if (subMenu != null) {
-						subMenu.open();
-					}
+					MenuManager.open(player, new InfusionMenu(player, data));
 				});
 
 		// #endregion
