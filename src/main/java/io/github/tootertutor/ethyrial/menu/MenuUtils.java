@@ -87,24 +87,30 @@ public class MenuUtils {
     public static void setPaginationControls(PagedMenu<?> menu, int page, int maxPage, DyeColor themeColor,
             Menu backTarget) {
         Ethyrial plugin = Ethyrial.getInstance();
+        int invSize = menu.getInventory().getSize();
+
+        int lastRowStart = invSize - 9;
+        int prevSlot = lastRowStart + 2; // ◀
+        int infoSlot = lastRowStart + 4; // Page info / ↩
+        int nextSlot = lastRowStart + 6; // ▶
 
         if (page > 0) {
             ItemStack prev = createGlassPane(DyeColor.GREEN, Component.text("◀ Prev", NamedTextColor.GRAY), plugin);
-            menu.setItem(47, prev, e -> menu.previousPage());
+            menu.setItem(prevSlot, prev, e -> menu.previousPage());
         }
 
         if (page + 1 < maxPage) {
             ItemStack next = createGlassPane(DyeColor.GREEN, Component.text("Next ▶", NamedTextColor.GRAY), plugin);
-            menu.setItem(51, next, e -> menu.nextPage());
+            menu.setItem(nextSlot, next, e -> menu.nextPage());
         }
 
         if (backTarget != null) {
             ItemStack back = createGlassPane(DyeColor.RED, Component.text("↩ Back", NamedTextColor.RED), plugin);
-            menu.setItem(49, back, e -> MenuManager.open(menu.player, backTarget));
+            menu.setItem(infoSlot, back, e -> MenuManager.open(menu.player, backTarget));
         } else {
             ItemStack info = createGlassPane(DyeColor.CYAN, Component.text("Page " + (page + 1) + " of " + maxPage),
                     plugin);
-            menu.setItem(49, info);
+            menu.setItem(infoSlot, info);
         }
     }
 
@@ -135,20 +141,22 @@ public class MenuUtils {
     }
 
     /**
-     * Creates a simple item with a display name and applies player skin if it's a player head.
+     * Creates a simple item with a display name and applies player skin if it's a
+     * player head.
      *
-     * @param material item material
-     * @param name     display name
-     * @param playerUUID UUID of the player whose head to use (if material is PLAYER_HEAD)
+     * @param material   item material
+     * @param name       display name
+     * @param playerUUID UUID of the player whose head to use (if material is
+     *                   PLAYER_HEAD)
      * @return the created ItemStack
      */
     public static ItemStack createItem(Material material, Component name, UUID playerUUID) {
         ItemStack item = new ItemStack(material);
-        
+
         if (material == Material.PLAYER_HEAD && playerUUID != null) {
             PlayerSkinHandler.applyPlayerHeadToItem(item, playerUUID);
         }
-        
+
         ItemMeta meta = item.getItemMeta();
         meta.displayName(name.colorIfAbsent(NamedTextColor.WHITE));
         item.setItemMeta(meta);
@@ -156,21 +164,23 @@ public class MenuUtils {
     }
 
     /**
-     * Creates a simple item with a display name and applies player skin if it's a player head.
+     * Creates a simple item with a display name and applies player skin if it's a
+     * player head.
      *
-     * @param material item material
-     * @param name     display name
-     * @param playerUUID UUID of the player whose head to use (if material is PLAYER_HEAD)
-     * @param lore     item lore
+     * @param material   item material
+     * @param name       display name
+     * @param playerUUID UUID of the player whose head to use (if material is
+     *                   PLAYER_HEAD)
+     * @param lore       item lore
      * @return the created ItemStack
      */
     public static ItemStack createItem(Material material, Component name, UUID playerUUID, List<Component> lore) {
         ItemStack item = new ItemStack(material);
-        
+
         if (material == Material.PLAYER_HEAD && playerUUID != null) {
             PlayerSkinHandler.applyPlayerHeadToItem(item, playerUUID);
         }
-        
+
         ItemMeta meta = item.getItemMeta();
         meta.displayName(name.colorIfAbsent(NamedTextColor.WHITE));
         if (lore != null && !lore.isEmpty()) {
