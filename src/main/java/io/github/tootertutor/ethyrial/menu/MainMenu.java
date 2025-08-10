@@ -15,6 +15,7 @@ import io.github.tootertutor.ethyrial.menu.menus.InfusionMenu;
 import io.github.tootertutor.ethyrial.menu.menus.SkillTreeMenu;
 import io.github.tootertutor.ethyrial.menu.menus.SpellTreeMenu;
 import io.github.tootertutor.ethyrial.menu.menus.StatsMenu;
+import io.github.tootertutor.ethyrial.menu.menus.WandLoadoutMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -82,7 +83,7 @@ public class MainMenu extends Menu {
 					MenuManager.open(player, new InfusionMenu(player, data));
 				});
 
-		// Wand & Staff
+		// Wand
 		plugin.getPlayerDAO().loadWandBindings(player.getUniqueId(), "wand").thenAccept(bindings -> {
 			String leftSpell = bindings.left() != null ? bindings.left().getKey() : "None";
 			String rightSpell = bindings.right() != null ? bindings.right().getKey() : "None";
@@ -91,7 +92,7 @@ public class MainMenu extends Menu {
 			// Left spell line
 			lore.add(Component.text()
 					.content("Left Core: ")
-					.color(NamedTextColor.AQUA)
+					.color(TextColor.color(0x2fc9d4))
 					.append(Component.text(leftSpell, NamedTextColor.WHITE))
 					.decoration(TextDecoration.ITALIC, false)
 					.build());
@@ -99,7 +100,7 @@ public class MainMenu extends Menu {
 			// Right spell line
 			lore.add(Component.text()
 					.content("Right Core: ")
-					.color(NamedTextColor.AQUA)
+					.color(TextColor.color(0x2fc9d4))
 					.append(Component.text(rightSpell, NamedTextColor.WHITE))
 					.decoration(TextDecoration.ITALIC, false)
 					.build());
@@ -108,16 +109,17 @@ public class MainMenu extends Menu {
 				setItem(3, MenuUtils.createItem(Material.STICK,
 						Component.text()
 								.content("Wand")
-								.color(NamedTextColor.GOLD)
+								.color(TextColor.color(0x4aeaff))
 								.decoration(TextDecoration.ITALIC, false)
 								.build(),
 						player.getUniqueId(), lore),
 						event -> {
-							// Open wand management menu
+							MenuManager.open(player, new WandLoadoutMenu(player, data, "wand"));
 						});
 			});
 		});
 
+		// Staff
 		plugin.getPlayerDAO().loadWandBindings(player.getUniqueId(), "staff").thenAccept(bindings -> {
 			String leftSpell = bindings.left() != null ? bindings.left().getKey() : "None";
 			String rightSpell = bindings.right() != null ? bindings.right().getKey() : "None";
@@ -126,7 +128,7 @@ public class MainMenu extends Menu {
 			// Left spell line
 			lore.add(Component.text()
 					.content("Left Core: ")
-					.color(NamedTextColor.AQUA)
+					.color(TextColor.color(0x1e9b71))
 					.append(Component.text(leftSpell, NamedTextColor.WHITE))
 					.decoration(TextDecoration.ITALIC, false)
 					.build());
@@ -134,7 +136,7 @@ public class MainMenu extends Menu {
 			// Right spell line
 			lore.add(Component.text()
 					.content("Right Core: ")
-					.color(NamedTextColor.AQUA)
+					.color(TextColor.color(0x1e9b71))
 					.append(Component.text(rightSpell, NamedTextColor.WHITE))
 					.decoration(TextDecoration.ITALIC, false)
 					.build());
@@ -142,12 +144,12 @@ public class MainMenu extends Menu {
 			setItem(5, MenuUtils.createItem(Material.STICK,
 					Component.text()
 							.content("Staff")
-							.color(NamedTextColor.GOLD)
+							.color(TextColor.color(0x1e9b39))
 							.decoration(TextDecoration.ITALIC, false)
 							.build(),
 					player.getUniqueId(), lore),
 					event -> {
-						// Open wand management menu
+						MenuManager.open(player, new WandLoadoutMenu(player, data, "staff"));
 					});
 		});
 	}

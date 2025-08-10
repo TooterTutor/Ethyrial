@@ -10,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
+import io.github.tootertutor.ethyrial.interfaces.OpensNativeView;
+
 public class MenuManager implements Listener {
     private static final Map<UUID, Menu> activeMenus = new ConcurrentHashMap<>();
 
@@ -25,8 +27,13 @@ public class MenuManager implements Listener {
         close(player);
 
         activeMenus.put(player.getUniqueId(), menu);
-        menu.render();
-        player.openInventory(menu.getInventory());
+
+        if (menu instanceof OpensNativeView nativeView) {
+            nativeView.openNative(player); // lets the menu open a real anvil, etc.
+        } else {
+            menu.render();
+            player.openInventory(menu.getInventory());
+        }
     }
 
     /**

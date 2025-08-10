@@ -40,7 +40,7 @@ public class WandSelectMenu extends Menu {
                     saveBinding(true);
                 });
 
-        setItem(1, spell.toItemStack(player));
+        setItem(4, spell.toItemStack(player));
 
         setItem(6, MenuUtils.createItem(Material.RED_DYE, Component.text("Bind to RIGHT Click", NamedTextColor.RED)),
                 e -> {
@@ -48,7 +48,7 @@ public class WandSelectMenu extends Menu {
                 });
 
         setItem(8, MenuUtils.createItem(Material.BARRIER, Component.text("Cancel", NamedTextColor.GRAY)), e -> {
-            MenuManager.open(player, new SpellTreeMenu(player, data));
+            MenuManager.open(player, new CodexMenu(player, data));
         });
 
     }
@@ -64,7 +64,7 @@ public class WandSelectMenu extends Menu {
                                     + (isLeftClick ? "LEFT" : "RIGHT") + " click.",
                             NamedTextColor.GREEN));
                 });
-        MenuManager.open(player, new SpellTreeMenu(player, data));
+        MenuManager.open(player, new CodexMenu(player, data));
     }
 
     private void loadBindings() {
