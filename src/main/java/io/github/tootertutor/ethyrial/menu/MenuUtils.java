@@ -1,13 +1,17 @@
 package io.github.tootertutor.ethyrial.menu;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,6 +23,7 @@ import io.github.tootertutor.ethyrial.handlers.PlayerSkinHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.wesjd.anvilgui.AnvilGUI;
 
 /**
  * Utility methods for creating inventory items.
@@ -213,4 +218,69 @@ public class MenuUtils {
         return slots;
     }
 
+    /**
+     * Open a simple rename prompt using AnvilGUI.
+     *
+     * @param player      the player
+     * @param baseItem    item shown in the left slot (purely cosmetic)
+     * @param initialText pre-filled text
+     * @param onConfirm   called with the final text when OUTPUT is clicked
+     */
+    public static void openRename(Player player, ItemStack baseItem, String initialText,
+            Consumer<String> onConfirm) {
+        openRename(player, baseItem, "Enter a name", initialText, onConfirm, null);
+    }
+
+    /**
+     * Open a rename prompt with title and a close hook (e.g., to reopen a menu).
+     *
+     * @param player      the player
+     * @param baseItem    item shown in the left slot
+     * @param title       anvil title
+     * @param initialText pre-filled text
+     * @param onConfirm   called with the final text when OUTPUT is clicked
+     * @param onClose     optional, runs when the GUI closes (ESC or after confirm)
+     */
+    public static void openRename(Player player, ItemStack baseItem, String title, String initialText,
+            Consumer<String> onConfirm, Runnable onClose) {
+
+        new AnvilGUI.Builder()
+                .plugin(Ethyrial.getInstance())
+                .title(title != null ? title : "Enter a name")
+                .text(initialText != null ? initialText : "")
+                .itemLeft(baseItem)
+                .onClick((slot, state) -> {
+                    if (slot != AnvilGUI.Slot.OUTPUT) {
+                        return Collections.emptyList();
+                    }
+
+                    final String typed = (state.getText() == null) ? "" : state.getText().trim();
+                    if (typed.isEmpty()) {
+                        state.getPlayer().sendMessage(Component.text("Name cannot be empty.", NamedTextColor.RED));
+                        return Arrays.asList(
+                                AnvilGUI.ResponseAction.replaceInputText(initialText != null ? initialText : ""));
+                    }
+
+                    try {
+                        onConfirm.accept(typed); // main thread
+                    } catch (Exception ex) {
+                        state.getPlayer().sendMessage(Component.text("Rename failed.", NamedTextColor.RED));
+                        ex.printStackTrace();
+                    }
+
+                    // Make sure any active menu state is cleaned up; caller can reopen in onClose.
+                    MenuManager.close(player);
+                    if (onClose != null)
+                        onClose.run();
+
+                    return Arrays.asList(AnvilGUI.ResponseAction.close());
+                })
+                .onClose(state -> {
+                    // Ensure we’re not left registered as the active menu
+                    MenuManager.close(player);
+                    if (onClose != null)
+                        onClose.run();
+                })
+                .open(player);
+    }
 }

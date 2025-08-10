@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,6 +26,11 @@ public abstract class Menu {
     public Menu(Player player, int size, Component title) {
         this.player = player;
         this.inventory = Bukkit.createInventory(player, size, title);
+    }
+
+    public Menu(Player player, InventoryType type, Component title) {
+        this.player = player;
+        this.inventory = Bukkit.createInventory(player, type, title);
     }
 
     /**
