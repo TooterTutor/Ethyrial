@@ -26,7 +26,7 @@ public class CodexMenu extends PagedMenu<Spell> {
     private final PlayerData data;
 
     public CodexMenu(Player player, PlayerData data) {
-        super(player, 54, Component.text("Codex").color(NamedTextColor.DARK_AQUA));
+        super(player, 45, Component.text("Codex").color(NamedTextColor.DARK_AQUA));
         this.data = data;
         setThemeColor(DyeColor.PURPLE);
         setBackTarget(new MainMenu(player, data));
@@ -36,7 +36,7 @@ public class CodexMenu extends PagedMenu<Spell> {
         setItems(spellList);
 
         setItems(plugin.getSpellsRegistered().getSpells().stream().collect(Collectors.toList()));
-        setItemsPerPage(3); // Number of domains per page
+        setMaxPages(2); // Number of pages the menu should have
 
     }
 

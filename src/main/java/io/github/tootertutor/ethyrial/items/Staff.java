@@ -22,7 +22,7 @@ public class Staff extends Item implements AutoRegisterItem {
 
     private final Ethyrial plugin = Ethyrial.getInstance();
 
-    protected Staff(Ethyrial plugin) {
+    public Staff(Ethyrial plugin) {
         super(plugin,
                 "staff",
                 "Staff",

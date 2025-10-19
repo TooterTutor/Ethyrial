@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,8 +14,11 @@ import io.github.tootertutor.ethyrial.data.PlayerDataManager;
 import io.github.tootertutor.ethyrial.database.PlayerDAO;
 import io.github.tootertutor.ethyrial.database.SQLiteDatabaseManager;
 import io.github.tootertutor.ethyrial.menu.MenuManager;
+import io.github.tootertutor.ethyrial.registry.CommandRegister;
 import io.github.tootertutor.ethyrial.registry.ItemRegister;
 import io.github.tootertutor.ethyrial.registry.SpellRegister;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public final class Ethyrial extends JavaPlugin {
 
@@ -64,16 +66,16 @@ public final class Ethyrial extends JavaPlugin {
 
         // Load Commands
         getLogger().info("Attempting to register commands...");
-        EthyrialCommand ethyrialCommand = new EthyrialCommand(this);
-        PluginCommand command = getCommand("ethyrial");
 
-        getLogger().info("Command lookup resoult: " + ((command == null) ? "null" : "found"));
-        if (command == null) {
-            getLogger().severe("Command 'ethyrial' is not registered in the plugin.yml!");
-            return;
-        }
-        command.setExecutor(ethyrialCommand);
-        command.setTabCompleter(ethyrialCommand);
+        var commandRoot = new EthyrialCommand("ethyrial");
+        getCommand("ethyrial").setExecutor(commandRoot);
+        getCommand("ethyrial").setTabCompleter(commandRoot);
+
+        var commandRegistration = new CommandRegister(this, commandRoot);
+        commandRegistration.autoRegisterCommands();
+
+        getComponentLogger().info(Component.text("Registered " + commandRegistration.size() + " dynamic subcommands",
+                NamedTextColor.GREEN));
 
         // Get Online Players
         Bukkit.getOnlinePlayers().forEach(player -> {

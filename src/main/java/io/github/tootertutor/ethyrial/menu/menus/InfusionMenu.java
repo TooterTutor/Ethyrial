@@ -1,9 +1,12 @@
 package io.github.tootertutor.ethyrial.menu.menus;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import io.github.tootertutor.ethyrial.Ethyrial;
 import io.github.tootertutor.ethyrial.data.PlayerData;
+import io.github.tootertutor.ethyrial.menu.MainMenu;
 import io.github.tootertutor.ethyrial.menu.Menu;
 import io.github.tootertutor.ethyrial.menu.MenuUtils;
 import net.kyori.adventure.text.Component;
@@ -20,7 +23,13 @@ public class InfusionMenu extends Menu {
 
     @Override
     public void render() {
+        MenuUtils.applyBorder(getInventory(), DyeColor.LIME, Ethyrial.getInstance(), MenuUtils.BorderStyle.TOP,
+                MenuUtils.BorderStyle.BOTTOM);
+
         setItem(22, MenuUtils.createItem(Material.DRAGON_BREATH,
                 Component.text("Infusion Coming Soon").color(NamedTextColor.GREEN)));
+
+        // Back Button
+        MenuUtils.setBackButton(this, new MainMenu(player, data));
     }
 }

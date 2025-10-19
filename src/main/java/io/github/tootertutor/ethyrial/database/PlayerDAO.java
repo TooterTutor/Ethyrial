@@ -31,17 +31,47 @@ public class PlayerDAO {
     public CompletableFuture<PlayerData> loadPlayerData(UUID uuid) {
         return db.runAsyncQuery(() -> {
             try (Connection conn = db.getConnection()) {
-                PlayerStats stats = null;
+                PlayerStats stats;
                 Set<String> unlockedSpells = new HashSet<>();
 
                 try (PreparedStatement stmt = conn.prepareStatement(
                         "SELECT mana, spellPower, bonusHealth FROM player_data WHERE uuid = ?")) {
                     stmt.setString(1, uuid.toString());
                     ResultSet rs = stmt.executeQuery();
+
                     if (rs.next()) {
-                        stats = new PlayerStats(rs.getInt("mana"), rs.getInt("spellPower"), rs.getInt("bonusHealth"));
+                        int mana = rs.getInt("mana");
+                        int spellPower = rs.getInt("spellPower");
+                        int bonusHealth = rs.getInt("bonusHealth");
+
+                        // Build PlayerStats from the existing 3 columns + defaults for the rest
+                        stats = new PlayerStats.Builder()
+                                .mana(mana)
+                                .maxMana(mana) // until you add a separate column
+                                .manaRegen(0) // default
+                                .healthBonus(bonusHealth)
+                                .strength(0)
+                                .agility(0)
+                                .defense(0)
+                                .spellPower(spellPower)
+                                .critChance(0)
+                                .critDamage(0)
+                                .build();
                     } else {
-                        stats = new PlayerStats(100, 10, 20); // default stats
+                        // First-time player defaults
+                        stats = new PlayerStats.Builder()
+                                .mana(100)
+                                .maxMana(100)
+                                .manaRegen(0)
+                                .healthBonus(20)
+                                .strength(0)
+                                .agility(0)
+                                .defense(0)
+                                .spellPower(10)
+                                .critChance(0)
+                                .critDamage(0)
+                                .build();
+
                         savePlayerData(uuid, new PlayerData(uuid, stats, new HashSet<>())).join();
                     }
                 }
@@ -65,12 +95,14 @@ public class PlayerDAO {
     public CompletableFuture<Void> savePlayerData(UUID uuid, PlayerData data) {
         return db.runAsyncQuery(() -> {
             try (Connection conn = db.getConnection()) {
+                PlayerStats s = data.getStats();
+
                 try (PreparedStatement stmt = conn.prepareStatement(
                         "REPLACE INTO player_data (uuid, mana, spellPower, bonusHealth) VALUES (?, ?, ?, ?)")) {
                     stmt.setString(1, uuid.toString());
-                    stmt.setInt(2, data.getStats().getMana());
-                    stmt.setInt(3, data.getStats().getSpellPower());
-                    stmt.setInt(4, data.getStats().getBonusHealth());
+                    stmt.setInt(2, s.getMana());
+                    stmt.setInt(3, s.getSpellPower());
+                    stmt.setInt(4, s.getHealthBonus());
                     stmt.executeUpdate();
                 }
 
@@ -103,7 +135,7 @@ public class PlayerDAO {
             try (Connection conn = db.getConnection()) {
                 String spell = spellKey != null ? spellKey.toString() : null;
 
-                // Insert the row if it doesn’t exist
+                // Ensure row exists once
                 try (PreparedStatement insert = conn.prepareStatement(
                         "INSERT OR IGNORE INTO wand_bindings (uuid, wand_id, left_spell, right_spell) VALUES (?, ?, NULL, NULL)")) {
                     insert.setString(1, uuid.toString());
@@ -114,14 +146,6 @@ public class PlayerDAO {
                 String query = isLeftClick
                         ? "UPDATE wand_bindings SET left_spell = ? WHERE uuid = ? AND wand_id = ?"
                         : "UPDATE wand_bindings SET right_spell = ? WHERE uuid = ? AND wand_id = ?";
-
-                try (PreparedStatement insert = conn.prepareStatement(
-                        "INSERT OR IGNORE INTO wand_bindings (uuid, wand_id, left_spell, right_spell) VALUES (?, ?, NULL, NULL)")) {
-                    insert.setString(1, uuid.toString());
-                    insert.setString(2, wandId);
-
-                    insert.executeUpdate();
-                }
 
                 try (PreparedStatement stmt = conn.prepareStatement(query)) {
                     stmt.setString(1, spell);

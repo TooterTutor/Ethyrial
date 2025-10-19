@@ -22,7 +22,7 @@ public class Wand extends Item implements AutoRegisterItem {
 
     private final Ethyrial plugin = Ethyrial.getInstance();
 
-    protected Wand(Ethyrial plugin) {
+    public Wand(Ethyrial plugin) {
         super(plugin,
                 "wand",
                 "Wand",

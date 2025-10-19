@@ -1,7 +1,9 @@
 # Ignore Gradle project-specific cache directory
 .gradle
-spell-tree-todo.md
+roadmap.md
 start_dev_server.sh
+dev_loop.sh
+dev_loop.bat
 
 # Ignore Gradle build output directory
 build

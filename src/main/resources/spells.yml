@@ -1,0 +1,15 @@
+fire_blast:
+  name: "Fire Blast"
+  description: "Emit a scorching burst."
+  domain: AURALIS
+  mana_cost: 20
+  cooldown: 5s
+  triggers: [CAST, HIT_ENTITY]
+  effects:
+    - type: particle
+      particle: END_ROD
+      count: 40
+      radius: 2.0
+    - type: damage
+      target: hit_entity
+      amount: 8

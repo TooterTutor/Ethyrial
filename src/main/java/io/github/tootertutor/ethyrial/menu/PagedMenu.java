@@ -47,14 +47,14 @@ public abstract class PagedMenu<T> extends Menu {
 
     @Override
     public void render() {
-        MenuUtils.applyBorder(getInventory(), themeColor, Ethyrial.getInstance(), MenuUtils.BorderStyle.TOP,
-                MenuUtils.BorderStyle.BOTTOM);
+        MenuUtils.applyBorder(getInventory(), themeColor, Ethyrial.getInstance(),
+                MenuUtils.BorderStyle.TOP, MenuUtils.BorderStyle.BOTTOM);
 
         int start = page * itemsPerPage;
         renderPage(start);
 
-        int maxPage = (int) Math.ceil((double) items.size() / itemsPerPage);
-        MenuUtils.setPaginationControls(this, page, maxPage, themeColor, backTarget);
+        int totalPages = getTotalPages();
+        MenuUtils.setPaginationControls(this, page, totalPages, themeColor, backTarget);
     }
 
     public void refresh() {
@@ -81,6 +81,21 @@ public abstract class PagedMenu<T> extends Menu {
 
     public int getMaxPage() {
         return (int) Math.ceil((double) items.size() / itemsPerPage);
+    }
+
+    public void setMaxPages(int pages) {
+        if (pages < 1)
+            pages = 1;
+        int count = Math.max(1, items.size());
+        this.itemsPerPage = (int) Math.ceil((double) count / pages);
+    }
+
+    public int getTotalPages() {
+        return Math.max(1, (int) Math.ceil((double) items.size() / Math.max(1, itemsPerPage)));
+    }
+
+    public int getLastPageIndex() {
+        return getTotalPages() - 1;
     }
 
     protected void fillRow(int row, ItemStack item) {

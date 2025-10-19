@@ -3,56 +3,90 @@ package io.github.tootertutor.ethyrial.builders;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import io.github.tootertutor.ethyrial.Ethyrial;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
- * A simple command dispatcher that maps subcommand names to CommandExecutor instances.
- * It allows registering subcommands and dispatching execution to the appropriate executor.
+ * Maps subcommands to executors and prints usage/arguments automatically.
+ *
+ * Example:
+ * new CommandBuilder("ethyrial")
+ * .register("give", new GiveCommand(), "/ethyrial give <item_key> [amount]
+ * [player]");
  */
-public class CommandBuilder {
+public class CommandBuilder implements CommandExecutor {
+
     private final Map<String, CommandExecutor> commands = new HashMap<>();
+    private final Map<String, String> usages = new HashMap<>();
+    private final String rootLabel;
 
-    /**
-     * Constructs a CommandBuilder.
-     * @param plugin The plugin instance (currently unused).
-     */
-    public CommandBuilder(Ethyrial plugin) {
+    public CommandBuilder(String rootLabel) {
+        this.rootLabel = rootLabel;
     }
 
-    /**
-     * Registers a subcommand executor with the given name.
-     * @param name The subcommand name.
-     * @param executor The CommandExecutor to handle the subcommand.
-     */
-    public void registerCommand(String name, CommandExecutor executor) {
+    public CommandBuilder register(String name, CommandExecutor executor) {
         commands.put(name.toLowerCase(), executor);
+        return this;
     }
 
-    /**
-     * Executes the subcommand based on the first argument.
-     * @param sender The command sender.
-     * @param command The command.
-     * @param label The command label.
-     * @param args The command arguments.
-     * @return true if the subcommand was found and executed, false otherwise.
-     */
-    public boolean executeCommand(CommandSender sender, Command command, String label, String[] args) {
+    public CommandBuilder register(String name, CommandExecutor executor, String usage) {
+        commands.put(name.toLowerCase(), executor);
+        if (usage != null && !usage.isBlank()) {
+            usages.put(name.toLowerCase(), usage);
+        }
+        return this;
+    }
+
+    public CommandBuilder usage(String name, String usage) {
+        if (usage != null && !usage.isBlank()) {
+            usages.put(name.toLowerCase(), usage);
+        }
+        return this;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            return false; // No subcommand provided
+            sendHelp(sender);
+            return true;
         }
 
-        String subCommand = args[0].toLowerCase();
-        CommandExecutor executor = commands.get(subCommand);
-        if (executor != null) {
-            // Remove the subcommand from the args array
-            String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
-            return executor.onCommand(sender, command, label, newArgs);
+        String sub = args[0].toLowerCase();
+        CommandExecutor exec = commands.get(sub);
+        if (exec == null) {
+            sender.sendMessage(Component.text("Unknown subcommand: ", NamedTextColor.RED)
+                    .append(Component.text(sub, NamedTextColor.YELLOW)));
+            sendHelp(sender);
+            return true;
         }
-        return false; // Command not found
+
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+        boolean ok = exec.onCommand(sender, command, label, newArgs);
+        if (!ok) {
+            String usage = usages.getOrDefault(sub, "/" + (rootLabel != null ? rootLabel : label) + " " + sub);
+            sender.sendMessage(Component.text("Usage: ", NamedTextColor.GRAY)
+                    .append(Component.text(usage, NamedTextColor.AQUA)));
+        }
+        return true;
+    }
+
+    private void sendHelp(CommandSender sender) {
+        if (commands.isEmpty()) {
+            sender.sendMessage(Component.text("No subcommands registered.", NamedTextColor.RED));
+            return;
+        }
+        sender.sendMessage(Component.text("Available subcommands:", NamedTextColor.GOLD));
+        for (var e : commands.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toList())) {
+            String name = e.getKey();
+            String usage = usages.getOrDefault(name, "/" + rootLabel + " " + name);
+            sender.sendMessage(Component.text(" - ", NamedTextColor.DARK_GRAY)
+                    .append(Component.text(usage, NamedTextColor.AQUA)));
+        }
     }
 }

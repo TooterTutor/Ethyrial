@@ -9,16 +9,21 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.tootertutor.ethyrial.Ethyrial;
+import io.github.tootertutor.ethyrial.interfaces.AutoRegisterCommand;
 import io.github.tootertutor.ethyrial.interfaces.Subcommand;
 import io.github.tootertutor.ethyrial.spells.Spell;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class CastCommand implements Subcommand {
+public class CastCommand implements Subcommand, AutoRegisterCommand {
     private final Ethyrial plugin;
 
     public CastCommand(Ethyrial plugin) {
         this.plugin = plugin;
+    }
+
+    public String getUsage() {
+        return "/ethyrial cast <spell_key> [player]";
     }
 
     @Override
@@ -28,12 +33,12 @@ public class CastCommand implements Subcommand {
 
     @Override
     public String getDescription() {
-        return "Cast a spell";
+        return "Cast a spell on yourself or another player.";
     }
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList();
+        return List.of("");
     }
 
     @Override
