@@ -1,5 +1,5 @@
 name: Ethyrial
-version: "1.0"
+version: "${version}"
 main: io.github.tootertutor.ethyrial.EthyrialPlugin
 api-version: "1.21"
 load: STARTUP
