@@ -1,27 +1,31 @@
-name : Ethyrial
-version : '1.0'
-main : io.github.tootertutor.ethyrial.Ethyrial
-api-version : '1.21'
-load : STARTUP
-authors : [ TooterTutor ]
-description : Magic System for Minecraft
+name: Ethyrial
+version: "1.0"
+main: io.github.tootertutor.ethyrial.EthyrialPlugin
+api-version: "1.21"
+load: STARTUP
+authors: [TooterTutor]
+description: Magic System for Minecraft
 commands:
   ethyrial:
-    description: Ethyrial Magic System
-    usage: /ethyrial
+    description: Main command for Ethyrial
+    usage: /ethyrial <subcommand>
     aliases: [ems]
     permission: ethyrial.command
-    permission-message: You do not have permission to use this command.
 
 permissions:
-  ethyrial.*:
-    description: Grants access to all Ethyrial commands
-    children:
-      ethyrial.command: true
-      ethyrial.spell.*: true
   ethyrial.command:
-    description: Grants access to the base Ethyrial command
+    description: Allows the player to use ethyrial commands
     default: op
-  ethyrial.give:
-    description: Gives a plugin item to the player
+  ethyrial.reload:
+    description: Allows the player to reload various aspects of the plugin
     default: op
+  ethyrial.admin:
+    description: Allows the player to use admin commands
+    default: op
+  ethyrial.update.notify:
+    description: Allows the player to receive update notifications
+    default: op
+
+  ethyrial.spell.upload:
+    description: Allows the player to upload spells to the server
+    default: true
