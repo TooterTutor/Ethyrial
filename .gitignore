@@ -1,4 +1,5 @@
 # Ignore Gradle project-specific cache directory
+.gitignore
 .gradle
 roadmap.md
 start_dev_server.sh
